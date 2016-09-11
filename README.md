@@ -1,0 +1,2 @@
+# spacemacs
+spacemacs configuration
