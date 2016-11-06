@@ -18,25 +18,27 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
+     vimscript
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     helm
-     ivy
-     deft
      better-defaults
+     github
+     version-control
+     ;; helm
+     ivy
+     (syntax-checking :variables syntax-checking-enable-by-default nil
+                      syntax-checking-enable-tooltips nil)
      (auto-completion :variables auto-completion-enable-sort-by-usage t
                       :disabled-for org markdown)
-     ;; git
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode)
      (python :variables
              python-test-runner '(nose pytest))
      emacs-lisp
      (clojure :variables clojure-enable-fancify-symbols t)
-     lua
      org
      yaml
      markdown
@@ -46,38 +48,23 @@ values."
      (typescript :variables
                  typescript-fmt-on-save nil
                  typescript-fmt-tool 'typescript-formatter)
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
-     (spell-checking :variables spell-checking-enable-by-default nil)
-     (syntax-checking :variables syntax-checking-enable-by-default nil
-                      syntax-checking-enable-tooltips nil)
-     ;; version-control
+     (shell :variables
+            shell-default-shell 'ansi-term
+            ; shell-default-height 30
+            ; shell-default-position 'bottom
+            shell-default-term-shell "/bin/zsh")
      (osx :variables osx-dictionary-dictionary-choice "Simplified Chinese - English")
+     myblog
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(
+                                      )
    ;; A list of packages and/or extensions that will not be install and loaded.
-   dotspacemacs-excluded-packages '()
-
-   ; '(counsel-projectile magit-gh-pulls magit-gitflow org-projectile evil-mc
-   ;                      evil-args evil-ediff evil-exchange evil-unimpaired
-   ;                      evil-indent-plus volatile-highlights
-   ;                      spaceline holy-mode skewer-mode rainbow-delimiters
-   ;                      highlight-indentation vi-tilde-fringe eyebrowse hl-anything
-   ;                      org-bullets smooth-scrolling org-repo-todo org-download org-timer
-   ;                      livid-mode git-gutter git-gutter-fringe  evil-escape
-   ;                      leuven-theme gh-md evil-lisp-state spray lorem-ipsum
-   ;                      ac-ispell ace-jump-mode auto-complete auto-dictionary
-   ;                      clang-format define-word google-translate disaster epic
-   ;                      fancy-battery neotree org-present orgit orglue spacemacs-theme
-   ;                      helm-flyspell flyspell-correct-helm clean-aindent-mode
-   ;                      helm-c-yasnippet ace-jump-helm-line helm-make
-   ;                      helm-themes helm-swoop helm-spacemacs-help smeargle
-   ;                      ido-vertical-mode flx-ido company-quickhelp)
+   dotspacemacs-excluded-packages '(
+                                    evil-unimpaired)
 
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
    ;; are declared in a layer which is not a member of
@@ -131,12 +118,13 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
+   dotspacemacs-themes '(
+                         spacemacs-dark
+                         monokai
                          spacemacs-light
                          solarized-light
                          solarized-dark
                          leuven
-                         monokai
                          zenburn)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
@@ -242,7 +230,7 @@ values."
    ;; If non nil line numbers are turned on in all `prog-mode' and `text-mode'
    ;; derivatives. If set to `relative', also turns on relative line numbers.
    ;; (default nil)
-   dotspacemacs-line-numbers nil
+   dotspacemacs-line-numbers t
    ;; If non-nil smartparens-strict-mode will be enabled in programming modes.
    ;; (default nil)
    dotspacemacs-smartparens-strict-mode nil
@@ -277,19 +265,21 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   (setq configuration-layer--elpa-archives
-        '(("melpa-cn" . "https://elpa.zilongshanren.com/melpa/")
-          ("org-cn"   . "https://elpa.zilongshanren.com/org/")
-          ("gnu-cn"   . "https://elpa.zilongshanren.com/gnu/")))
-
+      '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+        ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+        ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
   ;; https://github.com/syl20bnr/spacemacs/issues/2705
   ;; (setq tramp-mode nil)
-  (setq tramp-ssh-controlmaster-options
-        "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
+  (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
 
   ;; ss proxy. But it will cause anacond-mode failed.
   (setq socks-server '("Default server" "127.0.0.1" 1080 5))
   (setq evil-shift-round nil)
   (setq byte-compile-warnings '(not obsolete))
+
+  (setq neo-hidden-regexp-list '("^\\." "\\.cs\\.meta$" "\\.pyc$" "~$" "^#.*#$" "\\.elc$"))
+
+  (sp-local-pair 'markdown-mode "`" nil :actions nil)
   )
 
 (defun dotspacemacs/user-config ()
@@ -300,6 +290,21 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
   (global-hungry-delete-mode t)
+
+  (define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
+  (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
+
+  (put 'dired-find-alternate-file 'disabled nil)
+  ;; 主动加载 Dired Mode
+  ;; (require 'dired)
+  ;; (defined-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+  ;; 延迟加载
+  (with-eval-after-load 'dired
+    (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+
+  (global-evil-surround-mode)
+
+  (setq neo-show-hidden-files nil)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
